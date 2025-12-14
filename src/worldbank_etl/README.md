@@ -1,0 +1,15 @@
+# worldbank_etl
+
+This folder contains notebooks for loading indicator metadata and setting up vector search.
+
+## Explorations
+
+Data loading notebooks:
+- `load_worldbank_metadata.ipynb`: Fetches World Bank indicator metadata (~20k indicators)
+- `load_unsdg_metadata.ipynb`: Fetches UN SDG indicator metadata (~250 indicators)
+- `load_datagov_metadata.ipynb`: Fetches US government dataset metadata from Data.gov (~5k datasets)
+- `load_hdx_metadata.ipynb`: Fetches humanitarian dataset metadata from HDX (~5k datasets)
+- `load_cbs_metadata.ipynb`: Fetches CBS Netherlands statistical table metadata (~4k tables)
+
+Setup notebook:
+- `vector_search_setup.ipynb`: Creates the Vector Search endpoint and managed embedding index. Run after loading indicator metadata.

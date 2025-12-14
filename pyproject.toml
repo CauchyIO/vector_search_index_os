@@ -1,0 +1,22 @@
+[project]
+name = "worldbank"
+version = "0.0.1"
+authors = [{ name = "casper@cauchy.io" }]
+requires-python = ">=3.10,<=3.13"
+dependencies = [
+    "wbgapi",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "databricks-dlt",
+    "databricks-connect>=15.4,<15.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.black]
+line-length = 125
