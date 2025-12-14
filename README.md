@@ -12,6 +12,7 @@ A collection of ETLs that download metadata from open data sources and register 
 | Data.gov | `datagov_indicators` | ~5k |
 | HDX | `hdx_indicators` | ~5k |
 | CBS Netherlands | `cbs_indicators` | ~4k |
+| WHO | `who_indicators` | ~2k |
 
 ## Setup
 
@@ -19,13 +20,14 @@ A collection of ETLs that download metadata from open data sources and register 
 # Deploy
 databricks bundle deploy
 
-# Load data (run notebooks in explorations/)
+# Load data (run notebooks in src/open_data_etl/)
 # 1. load_worldbank_metadata.ipynb (World Bank)
 # 2. load_unsdg_metadata.ipynb
 # 3. load_imf_metadata.ipynb
 # 4. load_datagov_metadata.ipynb
 # 5. load_hdx_metadata.ipynb
 # 6. load_cbs_metadata.ipynb (CBS Netherlands)
+# 7. load_who_metadata.ipynb (WHO)
 
 # Create Vector Search index
 # Run vector_search_setup.ipynb

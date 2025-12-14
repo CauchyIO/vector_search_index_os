@@ -5,7 +5,7 @@ resources:
       tasks:
         - task_key: load_metadata
           notebook_task:
-            notebook_path: ../src/open_data_etl/explorations/load_worldbank_metadata.ipynb
+            notebook_path: ../src/open_data_etl/load_worldbank_metadata.ipynb
           environment_key: default
       environments:
         - environment_key: default

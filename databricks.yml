@@ -40,3 +40,10 @@ targets:
     permissions:
       - user_name: casper@cauchy.io
         level: CAN_MANAGE
+  dev2:
+    mode: development
+    workspace:
+      host: https://dbc-c7690892-938f.cloud.databricks.com
+    variables:
+      catalog: main_catalog
+      schema: dev

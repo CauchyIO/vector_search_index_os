@@ -5,7 +5,7 @@ resources:
       tasks:
         - task_key: setup_index
           notebook_task:
-            notebook_path: ../src/open_data_etl/explorations/vector_search_setup.ipynb
+            notebook_path: ../src/open_data_etl/vector_search_setup.ipynb
           environment_key: default
       environments:
         - environment_key: default
