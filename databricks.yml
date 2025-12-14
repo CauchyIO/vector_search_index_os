@@ -1,7 +1,7 @@
-# This is a Databricks asset bundle definition for worldbank.
+# This is a Databricks asset bundle definition for open_data_etl.
 # See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
 bundle:
-  name: worldbank
+  name: open_data_etl
   uuid: 5a72f6ab-eb95-4872-bf31-da51338f5213
 
 include:

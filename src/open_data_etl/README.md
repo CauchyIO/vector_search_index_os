@@ -1,6 +1,6 @@
-# worldbank_etl
+# open_data_etl
 
-This folder contains notebooks for loading indicator metadata and setting up vector search.
+ETL notebooks for loading open data metadata and setting up vector search indexes.
 
 ## Explorations
 

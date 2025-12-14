@@ -1,6 +1,6 @@
-# Indicator Vector Search
+# Open Data Vector Search
 
-Vector Search index over global indicator metadata for natural language discovery.
+A collection of ETLs that download metadata from open data sources and register them as Vector Search indexes in Databricks for natural language discovery.
 
 ## Data Sources
 
