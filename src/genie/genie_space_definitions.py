@@ -123,7 +123,7 @@ SELECT main_catalog.dev.remove_table_from_genie_space('<space_id>', 'catalog.sch
                 ),
             ],
             sql_functions=[
-                # Must be sorted alphabetically by identifier
+                # Sorted alphabetically by identifier
                 SqlFunction(identifier="main_catalog.dev.add_table_to_genie_space"),
                 SqlFunction(identifier="main_catalog.dev.add_table_to_worldbank_genie_space"),
                 SqlFunction(identifier="main_catalog.dev.add_table_with_columns_to_genie_space"),

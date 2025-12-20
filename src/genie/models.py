@@ -9,6 +9,22 @@ GenieSpace dataclass and provide:
 - Validation of configuration structure
 - Conversion to/from SDK types
 
+IMPORTANT - Genie API Requirements:
+-----------------------------------
+The Databricks Genie API has specific requirements for the serialized_space JSON:
+
+1. sql_functions MUST include an 'id' field (32-char hex string)
+2. sql_functions MUST be sorted by (id, identifier) tuple
+3. text_instructions should NOT include an 'id' field (API generates it)
+4. column_configs should be sorted alphabetically by column_name
+
+This module handles these requirements automatically:
+- SqlFunction generates deterministic IDs using MD5 hash of identifier
+- Instructions.to_dict() sorts sql_functions by (id, identifier)
+
+To fetch an existing space's config for reference:
+    space = client.genie.get_space(space_id, include_serialized_space=True)
+
 Usage:
     from genie.models import GenieSpaceConfig, TableDataSource, ColumnConfig
 
@@ -16,15 +32,17 @@ Usage:
     space = GenieSpaceConfig(
         title="My Analytics Space",
         warehouse_id="abc123",
-        data_sources=DataSources(
-            tables=[
-                TableDataSource(
-                    identifier="catalog.schema.table",
-                    column_configs=[
-                        ColumnConfig(column_name="id", get_example_values=True)
-                    ]
-                )
-            ]
+        serialized_space=SerializedSpace(
+            data_sources=DataSources(
+                tables=[
+                    TableDataSource(
+                        identifier="catalog.schema.table",
+                        column_configs=[
+                            ColumnConfig(column_name="id", get_example_values=True)
+                        ]
+                    )
+                ]
+            )
         )
     )
 
@@ -231,8 +249,8 @@ class TextInstruction(BaseGenieModel):
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
+        # Note: Do NOT include 'id' field - Genie API generates it
         return {
-            "id": self.id,  # Always set by model_validator
             "content": self.content if isinstance(self.content, list) else [self.content]
         }
 
@@ -264,15 +282,16 @@ class SqlFunction(BaseGenieModel):
     @model_validator(mode='before')
     @classmethod
     def generate_id_if_missing(cls, data: Any) -> Any:
-        """Generate a deterministic ID based on identifier if not provided.
+        """Generate a deterministic UUID-format ID based on identifier.
 
-        Uses the identifier itself as the ID to preserve sort order.
-        The Genie API requires sql_functions to be sorted by (id, identifier),
-        so using identifier as id ensures consistent ordering.
+        The Genie API requires sql_functions to be sorted by (id, identifier).
+        We use MD5 hash of identifier to generate a deterministic 32-char hex ID.
         """
         if isinstance(data, dict) and not data.get('id'):
-            # Use identifier as ID to preserve sort order
-            data['id'] = data.get('identifier', '')
+            import hashlib
+            identifier = data.get('identifier', '')
+            # MD5 hash produces 32 hex chars, same format as Databricks UUIDs
+            data['id'] = hashlib.md5(identifier.encode()).hexdigest()
         return data
 
     @computed_field
@@ -295,8 +314,9 @@ class SqlFunction(BaseGenieModel):
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
+        # Include id field - API requires it for sorting when multiple functions
         return {
-            "id": self.id,  # Always set by model_validator (equals identifier)
+            "id": self.id,
             "identifier": self.identifier
         }
 
@@ -326,9 +346,8 @@ class Instructions(BaseGenieModel):
         """Convert to dictionary for serialization."""
         result = {}
         if self.text_instructions:
-            # Sort by id for consistent ordering
-            sorted_instructions = sorted(self.text_instructions, key=lambda x: x.id or "")
-            result["text_instructions"] = [i.to_dict() for i in sorted_instructions]
+            # Keep original order
+            result["text_instructions"] = [i.to_dict() for i in self.text_instructions]
         if self.sql_functions:
             # Sort by (id, identifier) as required by Genie API
             sorted_functions = sorted(self.sql_functions, key=lambda x: (x.id or "", x.identifier))
