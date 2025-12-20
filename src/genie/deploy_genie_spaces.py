@@ -86,6 +86,7 @@ def deploy_all(
     spaces: List[GenieSpaceConfig],
     warehouse_id: str,
     dry_run: bool = False,
+    debug: bool = False,
 ) -> dict:
     """
     Deploy multiple Genie Spaces.
@@ -98,7 +99,7 @@ def deploy_all(
     for space in spaces:
         print(f"\nDeploying: {space.title}")
         try:
-            space_id = deploy_space(client, space, warehouse_id, dry_run)
+            space_id = deploy_space(client, space, warehouse_id, dry_run, debug)
             results[space.title] = space_id
             if space_id:
                 print(f"  Success: {space_id}")
@@ -153,6 +154,12 @@ def main():
         "-n",
         action="store_true",
         help="Show what would be deployed without deploying",
+    )
+    parser.add_argument(
+        "--debug",
+        "-d",
+        action="store_true",
+        help="Print the serialized JSON before deploying",
     )
     parser.add_argument(
         "--export-json",
@@ -221,7 +228,7 @@ def main():
     print("DEPLOYING GENIE SPACES")
     print(f"{'=' * 50}")
 
-    results = deploy_all(client, spaces, warehouse_id, args.dry_run)
+    results = deploy_all(client, spaces, warehouse_id, args.dry_run, args.debug)
 
     print(f"\n{'=' * 50}")
     print("SUMMARY")
