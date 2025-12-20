@@ -55,6 +55,7 @@ def deploy_space(
     space: GenieSpaceConfig,
     warehouse_id: str,
     dry_run: bool = False,
+    debug: bool = False,
 ) -> Optional[str]:
     """
     Deploy a single Genie Space.
@@ -64,12 +65,17 @@ def deploy_space(
     """
     space.warehouse_id = warehouse_id
 
-    if dry_run:
-        print(f"  [DRY RUN] Would deploy: {space.title}")
+    if dry_run or debug:
+        print(f"  [{'DRY RUN' if dry_run else 'DEBUG'}] Would deploy: {space.title}")
         print(f"    Tables: {len(space.serialized_space.data_sources.tables)}")
         print(f"    Functions: {len(space.serialized_space.instructions.sql_functions)}")
         print(f"    Instructions: {len(space.serialized_space.instructions.text_instructions)}")
-        return None
+        if debug:
+            print(f"\n  Serialized space JSON:")
+            print(space.get_serialized_space_json())
+            print()
+        if dry_run:
+            return None
 
     result = space.create_or_update(client)
     return result.space_id
