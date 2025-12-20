@@ -24,13 +24,102 @@ Usage:
 import argparse
 import json
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
 
 from databricks.sdk import WorkspaceClient
+from databricks.sdk.service.iam import AccessControlRequest, PermissionLevel
 
 from genie.genie_space_definitions import GENIE_SPACES, GENIE_SPACE_REGISTRY
 from genie.models import GenieSpaceConfig
+
+
+# =============================================================================
+# Service Principal for Genie Space Management Functions
+# =============================================================================
+
+@dataclass
+class ServicePrincipal:
+    """Service Principal that needs access to deployed Genie Spaces."""
+    application_id: str
+    name: str
+
+
+# SPN used by the SQL UDFs to manage Genie Space tables at runtime
+GENIE_MANAGEMENT_SPN = ServicePrincipal(
+    application_id="caf7ea80-d784-4e6e-b079-db47a7533d18",
+    name="genie_spn",
+)
+
+
+# =============================================================================
+# Genie Space Permissions
+# =============================================================================
+
+class GenieSpacePermission:
+    """Permission levels for Genie Spaces."""
+    CAN_VIEW = "CAN_VIEW"
+    CAN_EDIT = "CAN_EDIT"
+    CAN_MANAGE = "CAN_MANAGE"
+
+
+def grant_spn_access_to_space(
+    client: WorkspaceClient,
+    space_id: str,
+    spn: ServicePrincipal,
+    permission: str = GenieSpacePermission.CAN_EDIT,
+) -> None:
+    """
+    Grant a Service Principal access to a Genie Space.
+
+    Tries multiple permission APIs since Genie spaces may use different
+    permission systems depending on the Databricks version.
+
+    Args:
+        client: Authenticated WorkspaceClient
+        space_id: The Genie Space ID
+        spn: ServicePrincipal to grant access to
+        permission: Permission level (CAN_VIEW, CAN_EDIT, CAN_MANAGE)
+
+    Raises:
+        RuntimeError: If unable to grant permissions via any known method
+    """
+    acl = [
+        AccessControlRequest(
+            service_principal_name=spn.application_id,
+            permission_level=PermissionLevel(permission),
+        )
+    ]
+
+    # Try different object types - Genie spaces may be registered differently
+    object_types_to_try = [
+        "genie-spaces",
+        "dashboards",
+        "dbsql-dashboards",
+    ]
+
+    errors = []
+    for obj_type in object_types_to_try:
+        try:
+            client.permissions.update(
+                request_object_type=obj_type,
+                request_object_id=space_id,
+                access_control_list=acl,
+            )
+            print(f"    Granted {permission} via {obj_type}")
+            return
+        except Exception as e:
+            errors.append(f"{obj_type}: {e}")
+
+    # All attempts failed - raise with details
+    error_details = "\n      ".join(errors)
+    raise RuntimeError(
+        f"Could not grant {spn.name} access to space {space_id}. "
+        f"Tried:\n      {error_details}\n\n"
+        f"Please grant access manually via the Genie Space UI: "
+        f"Share -> Add '{spn.name}' with CAN_EDIT permission."
+    )
 
 
 def get_workspace_client(host: Optional[str] = None, profile: Optional[str] = None) -> WorkspaceClient:
@@ -60,6 +149,13 @@ def deploy_space(
     """
     Deploy a single Genie Space.
 
+    Args:
+        client: Authenticated WorkspaceClient
+        space: GenieSpaceConfig to deploy
+        warehouse_id: SQL warehouse ID to use
+        dry_run: If True, show what would be deployed without deploying
+        debug: If True, print the serialized JSON
+
     Returns:
         space_id if successful, None if dry run
     """
@@ -78,7 +174,16 @@ def deploy_space(
             return None
 
     result = space.create_or_update(client)
-    return result.space_id
+    space_id = result.space_id
+
+    # TODO: Grant SPN access so SQL UDFs can manage the space
+    # The Genie Space permissions API is not yet available via the SDK.
+    # For now, grant access manually via UI: Share -> Add 'genie_spn' with CAN_EDIT.
+    # if grant_spn_access and space_id:
+    #     print(f"  Granting {GENIE_MANAGEMENT_SPN.name} access...")
+    #     grant_spn_access_to_space(client, space_id, GENIE_MANAGEMENT_SPN)
+
+    return space_id
 
 
 def deploy_all(
@@ -90,6 +195,13 @@ def deploy_all(
 ) -> dict:
     """
     Deploy multiple Genie Spaces.
+
+    Args:
+        client: Authenticated WorkspaceClient
+        spaces: List of GenieSpaceConfig to deploy
+        warehouse_id: SQL warehouse ID to use
+        dry_run: If True, show what would be deployed without deploying
+        debug: If True, print the serialized JSON
 
     Returns:
         Dict mapping space titles to space_ids
@@ -228,7 +340,9 @@ def main():
     print("DEPLOYING GENIE SPACES")
     print(f"{'=' * 50}")
 
-    results = deploy_all(client, spaces, warehouse_id, args.dry_run, args.debug)
+    results = deploy_all(
+        client, spaces, warehouse_id, args.dry_run, args.debug
+    )
 
     print(f"\n{'=' * 50}")
     print("SUMMARY")
@@ -236,6 +350,18 @@ def main():
     for title, space_id in results.items():
         status = "OK" if space_id and not space_id.startswith("ERROR") else "FAILED"
         print(f"  [{status}] {title}: {space_id}")
+
+    # Reminder about SPN access
+    successful = [sid for sid in results.values() if sid and not str(sid).startswith("ERROR")]
+    if successful:
+        print(f"\n{'=' * 50}")
+        print("IMPORTANT: Grant SPN access manually")
+        print(f"{'=' * 50}")
+        print(f"The Genie Space permissions API is not yet available.")
+        print(f"For each space, grant access via UI:")
+        print(f"  1. Open the Genie Space")
+        print(f"  2. Click 'Share'")
+        print(f"  3. Add '{GENIE_MANAGEMENT_SPN.name}' with CAN_EDIT permission")
 
 
 if __name__ == "__main__":

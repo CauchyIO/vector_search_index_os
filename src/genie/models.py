@@ -211,9 +211,13 @@ class TextInstruction(BaseGenieModel):
 
     Instructions guide Genie's behavior for natural language queries.
 
+    Note: Unlike sql_functions, text_instructions should NOT include an 'id'
+    field when serialized - the Genie API generates it. The id field here
+    is only used internally for deduplication.
+
     Attributes:
-        id: Unique instruction identifier (auto-generated if not provided)
-        content: Instruction text (can be a list of strings for formatting)
+        id: Internal identifier (NOT serialized - API generates its own)
+        content: Instruction text (can be a string or list of strings)
     """
     id: Optional[str] = Field(
         default=None,
@@ -265,9 +269,17 @@ class SqlFunction(BaseGenieModel):
 
     SQL functions can be invoked by Genie to perform complex operations.
 
+    IMPORTANT: The Genie API requires:
+    - Each sql_function MUST have an 'id' field (32-char hex string)
+    - sql_functions MUST be sorted by (id, identifier) tuple
+    - Without these, the API returns "Internal Error" with no details
+
+    This class auto-generates deterministic IDs using MD5 hash of the identifier,
+    and Instructions.to_dict() handles the sorting.
+
     Attributes:
-        id: Unique function reference identifier (auto-generated if not provided)
-        identifier: Full Unity Catalog path to the function
+        id: Unique function reference identifier (auto-generated using MD5 of identifier)
+        identifier: Full Unity Catalog path to the function (catalog.schema.function)
     """
     id: Optional[str] = Field(
         default=None,
