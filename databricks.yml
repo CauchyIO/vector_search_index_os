@@ -8,6 +8,13 @@ include:
   - resources/*.yml
   - resources/*/*.yml
 
+sync:
+  include:
+    - src/genie/*.py
+    - src/genie/*.ipynb
+    - src/genie/*.sql
+    - src/genie/*.json
+
 # Variable declarations. These variables are assigned in the dev/prod targets below.
 variables:
   catalog:
@@ -17,14 +24,15 @@ variables:
 
 targets:
   dev:
-    # The default target uses 'mode: development' to create a development copy.
-    # - Deployed resources get prefixed with '[dev my_user_name]'
-    # - Any job schedules and triggers are paused by default.
-    # See also https://docs.databricks.com/dev-tools/bundles/deployment-modes.html.
-    mode: development
+    # Using production mode to avoid name prefixes on schemas.
+    # Schedules are paused via presets.
+    mode: production
     default: true
     workspace:
       host: https://dbc-930eaa5c-35a0.cloud.databricks.com
+      root_path: /Workspace/Users/casper@cauchy.io/.bundle/${bundle.name}/${bundle.target}
+    presets:
+      trigger_pause_status: PAUSED
     variables:
       catalog: main_catalog
       schema: dev

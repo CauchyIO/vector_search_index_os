@@ -1,0 +1,178 @@
+{
+  "space_id": "01f0d8eb90771a3ea44202866b79cb57",
+  "title": "WHO Data Explorer Genie Space",
+  "description": null,
+  "source_workspace": "https://dbc-930eaa5c-35a0.cloud.databricks.com",
+  "serialized_space": {
+    "version": 1,
+    "data_sources": {
+      "tables": [
+        {
+          "identifier": "main_catalog.dev.worldbank_indicators",
+          "column_configs": [
+            {
+              "column_name": "aggregation_method",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "embedding_text",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "indicator_id",
+              "get_example_values": true
+            },
+            {
+              "column_name": "indicator_name",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "license_type",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "long_definition",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "periodicity",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "source",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "source_organization",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "topics",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "unit",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            }
+          ]
+        },
+        {
+          "identifier": "main_catalog.dev.worldbank_indicators_index",
+          "column_configs": [
+            {
+              "column_name": "__db_embedding_text_vector"
+            },
+            {
+              "column_name": "aggregation_method",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "embedding_text",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "indicator_id",
+              "get_example_values": true
+            },
+            {
+              "column_name": "indicator_name",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "license_type",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "long_definition",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "periodicity",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "source",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "source_organization",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "topics",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            },
+            {
+              "column_name": "unit",
+              "get_example_values": true,
+              "build_value_dictionary": true
+            }
+          ]
+        }
+      ]
+    },
+    "instructions": {
+      "text_instructions": [
+        {
+          "id": "01f0d8edb8001d59a0f5c9c49259f6bc",
+          "content": [
+            "Semantic search pattern:\n",
+            "SELECT \n",
+            "  indicator_id, \n",
+            "  indicator_name, \n",
+            "  embedding_text \n",
+            "FROM main_catalog.dev.{table_name}\n",
+            "WHERE indicator_id IN (\n",
+            "  SELECT indicator_id \n",
+            "  FROM {search_function}('search terms from user question')\n",
+            ")\n",
+            "\n",
+            "Source routing:\n",
+            "\n",
+            "| Domain     | Function                    | Table                |\n",
+            "|------------|-----------------------------|----------------------|\n",
+            "| WHO        | search_who_indicators       | who_indicators       |\n",
+            "| World Bank | search_worldbank_indicators | worldbank_indicators |\n",
+            "\n",
+            "Route based on topic:\n",
+            "\n",
+            "WHO \u2014 disease, mortality, life expectancy, vaccination, healthcare workers, hospitals, mental health, maternal health, child health, epidemics, sanitation, nutrition deficiencies, causes of death, medical treatment\n",
+            "\n",
+            "World Bank \u2014 GDP, inflation, trade, exports, imports, poverty, unemployment, labor force, education enrollment, literacy, infrastructure, electricity, internet access, CO2 emissions, population growth, urbanization, foreign investment, government debt, tax revenue\n",
+            "\n",
+            "When a query spans both domains (e.g., \"health expenditure and GDP\"), execute both functions and combine results using UNION or present them as separate result sets."
+          ]
+        }
+      ],
+      "sql_functions": [
+        {
+          "id": "01f0d8ebb1f41c6e9da767ce1e8f0279",
+          "identifier": "main_catalog.dev.search_worldbank_indicators"
+        },
+        {
+          "id": "01f0d8fba9441c44b6ad4bd8c6a7b05b",
+          "identifier": "main_catalog.dev.search_who_indicators"
+        }
+      ]
+    }
+  }
+}
