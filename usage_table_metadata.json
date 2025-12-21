@@ -1,0 +1,261 @@
+{
+  "date_range": {
+    "min_date": "2025-09-25",
+    "max_date": "2025-12-21",
+    "num_days": "76",
+    "total_records": "1458"
+  },
+  "record_types": [
+    {
+      "record_type": "ORIGINAL",
+      "count": "1458",
+      "percentage": "100.00"
+    }
+  ],
+  "billing_origin_products": [
+    {
+      "billing_origin_product": "DEFAULT_STORAGE",
+      "count": "839",
+      "total_usage": "55.88"
+    },
+    {
+      "billing_origin_product": "VECTOR_SEARCH",
+      "count": "228",
+      "total_usage": "781.49"
+    },
+    {
+      "billing_origin_product": "INTERACTIVE",
+      "count": "170",
+      "total_usage": "41.17"
+    },
+    {
+      "billing_origin_product": "NETWORKING",
+      "count": "107",
+      "total_usage": "0.32"
+    },
+    {
+      "billing_origin_product": "PREDICTIVE_OPTIMIZATION",
+      "count": "28",
+      "total_usage": "2.81"
+    },
+    {
+      "billing_origin_product": "APPS",
+      "count": "25",
+      "total_usage": "12.22"
+    },
+    {
+      "billing_origin_product": "AI_GATEWAY",
+      "count": "25",
+      "total_usage": "0.22"
+    },
+    {
+      "billing_origin_product": "DLT",
+      "count": "13",
+      "total_usage": "3.85"
+    },
+    {
+      "billing_origin_product": "MODEL_SERVING",
+      "count": "13",
+      "total_usage": "0.62"
+    },
+    {
+      "billing_origin_product": "SQL",
+      "count": "10",
+      "total_usage": "17.17"
+    }
+  ],
+  "sku_names": [
+    {
+      "sku_name": "PREMIUM_SERVERLESS_REAL_TIME_INFERENCE_US_EAST_OHIO",
+      "record_count": "232",
+      "total_usage": "770.09",
+      "usage_unit": "DBU"
+    },
+    {
+      "sku_name": "PREMIUM_DATABRICKS_STORAGE_US_EAST_OHIO",
+      "record_count": "839",
+      "total_usage": "55.88",
+      "usage_unit": "DSU"
+    },
+    {
+      "sku_name": "PREMIUM_ALL_PURPOSE_SERVERLESS_COMPUTE_US_EAST_OHIO",
+      "record_count": "195",
+      "total_usage": "53.39",
+      "usage_unit": "DBU"
+    },
+    {
+      "sku_name": "PREMIUM_JOBS_SERVERLESS_COMPUTE_US_EAST_OHIO",
+      "record_count": "75",
+      "total_usage": "18.91",
+      "usage_unit": "DBU"
+    },
+    {
+      "sku_name": "PREMIUM_SERVERLESS_SQL_COMPUTE_US_EAST_OHIO",
+      "record_count": "10",
+      "total_usage": "17.17",
+      "usage_unit": "DBU"
+    },
+    {
+      "sku_name": "PUBLIC_CONNECTIVITY_DATA_PROCESSED_US_EAST_OHIO",
+      "record_count": "71",
+      "total_usage": "0.30",
+      "usage_unit": "GB"
+    },
+    {
+      "sku_name": "INTERNET_EGRESS_FROM_US_EAST_OHIO",
+      "record_count": "28",
+      "total_usage": "0.02",
+      "usage_unit": "GB"
+    },
+    {
+      "sku_name": "INTER_REGION_EGRESS_FROM_US_EAST_OHIO",
+      "record_count": "8",
+      "total_usage": "0.00",
+      "usage_unit": "GB"
+    }
+  ],
+  "clouds": [
+    {
+      "cloud": "AWS",
+      "count": "1458",
+      "total_usage": "915.76"
+    }
+  ],
+  "usage_units": [
+    {
+      "usage_unit": "DSU",
+      "count": "839"
+    },
+    {
+      "usage_unit": "DBU",
+      "count": "512"
+    },
+    {
+      "usage_unit": "GB",
+      "count": "107"
+    }
+  ],
+  "workspace_count": "1",
+  "identity_patterns": [
+    {
+      "run_as_status": "no_run_as",
+      "owned_by_status": "no_owned_by",
+      "count": "1203"
+    },
+    {
+      "run_as_status": "has_run_as",
+      "owned_by_status": "no_owned_by",
+      "count": "245"
+    },
+    {
+      "run_as_status": "no_run_as",
+      "owned_by_status": "has_owned_by",
+      "count": "10"
+    }
+  ],
+  "custom_tags_usage": [
+    {
+      "tag_status": "no_tags",
+      "count": "1430"
+    },
+    {
+      "tag_status": "has_tags",
+      "count": "28"
+    }
+  ],
+  "usage_metadata_resources": [
+    {
+      "has_cluster": "0",
+      "has_job": "0",
+      "has_warehouse": "0",
+      "has_pool": "0",
+      "has_notebook": "0",
+      "has_pipeline": "0",
+      "has_endpoint": "0",
+      "count": "999"
+    },
+    {
+      "has_cluster": "0",
+      "has_job": "0",
+      "has_warehouse": "0",
+      "has_pool": "0",
+      "has_notebook": "0",
+      "has_pipeline": "0",
+      "has_endpoint": "1",
+      "count": "232"
+    },
+    {
+      "has_cluster": "0",
+      "has_job": "0",
+      "has_warehouse": "0",
+      "has_pool": "0",
+      "has_notebook": "1",
+      "has_pipeline": "0",
+      "has_endpoint": "0",
+      "count": "170"
+    },
+    {
+      "has_cluster": "0",
+      "has_job": "0",
+      "has_warehouse": "0",
+      "has_pool": "0",
+      "has_notebook": "0",
+      "has_pipeline": "1",
+      "has_endpoint": "0",
+      "count": "47"
+    },
+    {
+      "has_cluster": "0",
+      "has_job": "0",
+      "has_warehouse": "1",
+      "has_pool": "0",
+      "has_notebook": "0",
+      "has_pipeline": "0",
+      "has_endpoint": "0",
+      "count": "10"
+    }
+  ],
+  "node_types": [
+    {
+      "node_type": "db.xxsmall",
+      "count": "10",
+      "total_usage": "17.17"
+    }
+  ],
+  "usage_types": [
+    {
+      "usage_type": "API_OPERATION",
+      "count": "760",
+      "total_usage": "55.74"
+    },
+    {
+      "usage_type": "COMPUTE_TIME",
+      "count": "474",
+      "total_usage": "858.72"
+    },
+    {
+      "usage_type": "NETWORK_BYTE",
+      "count": "132",
+      "total_usage": "0.54"
+    },
+    {
+      "usage_type": "STORAGE_SPACE",
+      "count": "79",
+      "total_usage": "0.13"
+    },
+    {
+      "usage_type": "TOKEN",
+      "count": "13",
+      "total_usage": "0.62"
+    }
+  ],
+  "record_type_details": [
+    {
+      "record_type": "ORIGINAL",
+      "count": "1458",
+      "net_usage": "915.76",
+      "first_date": "2025-09-25",
+      "last_date": "2025-12-21"
+    }
+  ]
+}

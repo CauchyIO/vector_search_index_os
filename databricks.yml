@@ -1,0 +1,57 @@
+# This is a Databricks asset bundle definition for open_data_etl.
+# See https://docs.databricks.com/dev-tools/bundles/index.html for documentation.
+bundle:
+  name: open_data_etl
+  uuid: 5a72f6ab-eb95-4872-bf31-da51338f5213
+
+include:
+  - resources/*.yml
+  - resources/*/*.yml
+
+sync:
+  include:
+    - src/genie/*.py
+    - src/genie/*.ipynb
+    - src/genie/*.sql
+    - src/genie/*.json
+
+# Variable declarations. These variables are assigned in the dev/prod targets below.
+variables:
+  catalog:
+    description: The catalog to use
+  schema:
+    description: The schema to use
+
+targets:
+  dev:
+    # Using production mode to avoid name prefixes on schemas.
+    # Schedules are paused via presets.
+    mode: production
+    default: true
+    workspace:
+      host: https://dbc-930eaa5c-35a0.cloud.databricks.com
+      root_path: /Workspace/Users/casper@cauchy.io/.bundle/${bundle.name}/${bundle.target}
+    presets:
+      trigger_pause_status: PAUSED
+    variables:
+      catalog: main_catalog
+      schema: dev
+  prod:
+    mode: production
+    workspace:
+      host: https://dbc-930eaa5c-35a0.cloud.databricks.com
+      # We explicitly deploy to /Workspace/Users/casper@cauchy.io to make sure we only have a single copy.
+      root_path: /Workspace/Users/casper@cauchy.io/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      catalog: main_catalog
+      schema: prod
+    permissions:
+      - user_name: casper@cauchy.io
+        level: CAN_MANAGE
+  dev2:
+    mode: development
+    workspace:
+      host: https://dbc-c7690892-938f.cloud.databricks.com
+    variables:
+      catalog: main_catalog
+      schema: dev

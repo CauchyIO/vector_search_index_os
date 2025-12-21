@@ -1,0 +1,6 @@
+resources:
+  schemas:
+    worldbank:
+      name: worldbank
+      catalog_name: ${var.catalog}
+      comment: "World Bank indicator data tables. Each table contains time series data for a specific indicator across countries."
