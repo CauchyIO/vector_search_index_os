@@ -195,9 +195,13 @@ class DataSources(BaseGenieModel):
     )
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary for serialization."""
+        """Convert to dictionary for serialization.
+
+        Note: Tables are sorted by identifier as required by the Genie API.
+        """
+        sorted_tables = sorted(self.tables, key=lambda t: t.identifier)
         return {
-            "tables": [t.to_dict() for t in self.tables]
+            "tables": [t.to_dict() for t in sorted_tables]
         }
 
 
@@ -334,6 +338,125 @@ class SqlFunction(BaseGenieModel):
 
 
 # =============================================================================
+# JOIN SPECIFICATIONS
+# =============================================================================
+
+class JoinTableRef(BaseGenieModel):
+    """
+    Reference to a table in a join specification.
+
+    Attributes:
+        identifier: Full Unity Catalog path (catalog.schema.table)
+        alias: Optional alias for use in join SQL
+    """
+    identifier: str = Field(
+        ...,
+        pattern=r'^[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+\.[a-zA-Z0-9_]+$',
+        description="Full Unity Catalog path (catalog.schema.table)"
+    )
+    alias: Optional[str] = Field(
+        default=None,
+        description="Alias for use in join SQL"
+    )
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        result = {"identifier": self.identifier}
+        if self.alias:
+            result["alias"] = self.alias
+        return result
+
+
+class RelationshipType:
+    """Relationship types for join specifications."""
+    MANY_TO_MANY = "MANY_TO_MANY"
+    MANY_TO_ONE = "MANY_TO_ONE"
+    ONE_TO_MANY = "ONE_TO_MANY"
+    ONE_TO_ONE = "ONE_TO_ONE"
+
+
+class JoinSpec(BaseGenieModel):
+    """
+    Specification for a join between two tables.
+
+    Defines how Genie should join tables together when querying.
+
+    Attributes:
+        id: Unique join identifier (auto-generated)
+        left: Left table reference
+        right: Right table reference
+        left_column: Column name on the left table
+        right_column: Column name on the right table
+        relationship_type: Type of relationship (MANY_TO_MANY, MANY_TO_ONE, etc.)
+    """
+    id: Optional[str] = Field(
+        default=None,
+        description="Unique join identifier"
+    )
+    left: JoinTableRef = Field(
+        ...,
+        description="Left table in the join"
+    )
+    right: JoinTableRef = Field(
+        ...,
+        description="Right table in the join"
+    )
+    left_column: str = Field(
+        ...,
+        description="Column name on the left table"
+    )
+    right_column: str = Field(
+        ...,
+        description="Column name on the right table"
+    )
+    relationship_type: str = Field(
+        default=RelationshipType.MANY_TO_ONE,
+        description="Type of relationship (MANY_TO_MANY, MANY_TO_ONE, ONE_TO_MANY, ONE_TO_ONE)"
+    )
+
+    @model_validator(mode='after')
+    def generate_id_if_missing(self) -> "JoinSpec":
+        """Generate a deterministic ID based on table identifiers."""
+        if not self.id:
+            import hashlib
+            join_key = f"{self.left.identifier}:{self.right.identifier}:{self.left_column}:{self.right_column}"
+            object.__setattr__(self, 'id', hashlib.md5(join_key.encode()).hexdigest())
+        return self
+
+    def _get_alias(self, table_ref: JoinTableRef) -> str:
+        """Get alias for a table reference, defaulting to table name."""
+        if table_ref.alias:
+            return table_ref.alias
+        # Default to the table name (last part of identifier)
+        return table_ref.identifier.split(".")[-1]
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        left_alias = self._get_alias(self.left)
+        right_alias = self._get_alias(self.right)
+
+        # Build SQL in the format Genie expects:
+        # ["`left_alias`.`left_col` = `right_alias`.`right_col`", "--rt=FROM_RELATIONSHIP_TYPE_XXX--"]
+        sql = [
+            f"`{left_alias}`.`{self.left_column}` = `{right_alias}`.`{self.right_column}`",
+            f"--rt=FROM_RELATIONSHIP_TYPE_{self.relationship_type}--",
+        ]
+
+        return {
+            "id": self.id,
+            "left": {
+                "identifier": self.left.identifier,
+                "alias": left_alias,
+            },
+            "right": {
+                "identifier": self.right.identifier,
+                "alias": right_alias,
+            },
+            "sql": sql,
+        }
+
+
+# =============================================================================
 # INSTRUCTIONS
 # =============================================================================
 
@@ -344,6 +467,7 @@ class Instructions(BaseGenieModel):
     Attributes:
         text_instructions: Text-based instructions for Genie
         sql_functions: SQL functions available to Genie
+        join_specs: Join specifications for table relationships
     """
     text_instructions: List[TextInstruction] = Field(
         default_factory=list,
@@ -352,6 +476,10 @@ class Instructions(BaseGenieModel):
     sql_functions: List[SqlFunction] = Field(
         default_factory=list,
         description="SQL functions available to Genie"
+    )
+    join_specs: List[JoinSpec] = Field(
+        default_factory=list,
+        description="Join specifications for table relationships"
     )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -364,6 +492,10 @@ class Instructions(BaseGenieModel):
             # Sort by (id, identifier) as required by Genie API
             sorted_functions = sorted(self.sql_functions, key=lambda x: (x.id or "", x.identifier))
             result["sql_functions"] = [f.to_dict() for f in sorted_functions]
+        if self.join_specs:
+            # Sort by id as required by Genie API
+            sorted_joins = sorted(self.join_specs, key=lambda x: x.id or "")
+            result["join_specs"] = [j.to_dict() for j in sorted_joins]
         return result
 
 
@@ -733,6 +865,10 @@ __all__ = [
     "ColumnConfig",
     "TableDataSource",
     "DataSources",
+    # Join specifications
+    "JoinTableRef",
+    "JoinSpec",
+    "RelationshipType",
     # Instructions
     "TextInstruction",
     "SqlFunction",

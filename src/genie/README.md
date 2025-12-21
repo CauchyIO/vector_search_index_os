@@ -8,6 +8,7 @@ This module provides tools for defining and deploying Databricks Genie Spaces as
 - `genie_space_definitions.py` - Genie Space definitions (add your spaces here)
 - `deploy_genie_spaces.py` - CLI tool to deploy spaces to Databricks
 - `genie_space_table_functions.sql` - SQL functions for managing Genie Space tables at runtime
+- `extract_usage_metadata.py` - Extract metadata from tables for enriching Genie Space descriptions
 
 ## Quick Start
 
@@ -125,6 +126,12 @@ SELECT main_catalog.dev.list_tables_in_genie_space('<space_id>')
 -- Remove a table from a Genie Space
 SELECT main_catalog.dev.remove_table_from_genie_space('<space_id>', 'catalog.schema.table')
 ```
+
+## Enriching Genie Space with Table Metadata
+
+Genie Spaces work best when they understand not just the schema of a table, but the actual data within it. For tables with categorical columns (like `sku_name` or `billing_origin_product`), knowing which values exist helps Genie generate accurate queries.
+
+The `extract_usage_metadata.py` script queries a table to discover its data diversity—what values appear in each column, how they're distributed, and which fields are populated. This information can then be incorporated into the Genie Space description or instructions, giving the AI assistant context about what the data actually contains rather than just its structure.
 
 ## Troubleshooting
 
